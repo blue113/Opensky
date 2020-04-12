@@ -116,29 +116,32 @@ function HomePage() {
   const [open, setOpen] = React.useState(false);
   const [departing, setDeparting] = React.useState('');
   const [arriving, setArriving] = React.useState('');
-  const [allFlights, setAllFlights] = React.useState([]);
+  const [allArrialsFlights, setAllArrialsFlights] = React.useState([]);
+  const [allDepaturesFlights, setAllDepaturesFlights] = React.useState([]);
   const [lastDeparture, setLastDeparture] = React.useState(0);
   const [lastArrival, setLastArrival] = React.useState(0);
-  const [itemValue, setItemValue] = useState('');
+  const [icao, setIcao] = useState('');
+  
   const handleOpen = () => {
     setOpen(true);
   };
+  
   const handleClose = () => {
     setOpen(false);
   };
+  
   const dispatch = useDispatch();
+  
   useEffect(() => {
     dispatch(userActions.getAll());
     dispatch(skyActions.getAllStates());
-
   }, []);
 
-  function rand() {
+  const rand = () => {
     return Math.round(Math.random() * 20) - 10;
   }
 
-
-  function getModalStyle() {
+  const getModalStyle = () => {
     const top = 150;
     const left = 150;
 
@@ -148,27 +151,27 @@ function HomePage() {
       // transform: `translate(-${top}%, -${left}%)`,
     };
   }
+  
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
 
   const changeDeparting = (e) => {
     let curTimestamp = new Date().getTime() / 1000 | 0;
-    console.log("curTimestamp ====> ", curTimestamp);
     let tm = e.target.value;
     let last = curTimestamp - tm * 60 * 60;
-    console.log(last);
+    console.log("ICAO start last ====> ",icao, curTimestamp, last);
     setLastDeparture(last);
     setDeparting(e.target.value);
+    getDeparturesByAirport(icao, last, curTimestamp);
   }
 
   const changeArriving = (e) => {
     let curTimestamp = new Date().getTime() / 1000 | 0;
-    console.log("curTimestamp ====> ", curTimestamp);
     let tm = e.target.value;
     let last = curTimestamp - tm * 60 * 60;
-    console.log(last);
     setLastArrival(last);
     setArriving(e.target.value);
+    getArrivalsByAirport(icao, last, curTimestamp);
   }
 
   const body = (
@@ -185,7 +188,6 @@ function HomePage() {
                 onChange={changeDeparting}
               >
                 <MenuItem value="">
-                  {/* <em>None</em> */}
                 </MenuItem>
                 <MenuItem value={10}>10</MenuItem>
                 <MenuItem value={40}>40</MenuItem>
@@ -197,8 +199,8 @@ function HomePage() {
             <Container maxWidth="lg" fixed className={classes.modalContent}>
               <Grid container justify="center">
                 {
-                  allFlights && allFlights.map((val, key) => {
-                    console.log("val ====> ", val);
+                  allDepaturesFlights && allDepaturesFlights.map((val, key) => {
+                    console.log('allDepaturesFlights => ', key);
                     return (val.firstSeen > lastDeparture) && (
                       <Card className={classes.root} variant="outlined" key={key}>
                         <CardContent>
@@ -256,7 +258,8 @@ function HomePage() {
             <Container fixed maxWidth="lg" className={classes.modalContent}>
               <Grid container justify="center">
                 {
-                  allFlights && allFlights.map((val, key) => {
+                  allArrialsFlights && allArrialsFlights.map((val, key) => {
+                    console.log('allArrivalFlights => ', key);
                     return (val.lastSeen > lastArrival) && (
                       <Card className={classes.root} variant="outlined" key={key}>
                         <CardContent>
@@ -293,12 +296,14 @@ function HomePage() {
     </div>
   );
 
-  function getCityInfo(airport) {
-    console.log('airport = ',airport);
-    let curTimestamp = new Date().getTime() / 1000 | 0;
-    let begin = curTimestamp - 48 *  60 * 60;
-    let end = curTimestamp;
-    var options = {
+  const getCityInfo = (airport) => {
+    setIcao(airport);
+    setOpen(true);
+  }
+
+  const getArrivalsByAirport = (airport, begin, end) => {
+    console.log('arrival = ',airport, begin, end);
+    let options = {
       method: 'GET',
       headers: {}
     };
@@ -306,23 +311,37 @@ function HomePage() {
     fetch('https://opensky-network.org/api/flights/arrival?airport='+airport+'&begin='+begin+'&end='+end, options)
       .then(response => response.json())
       .then(data => {
-        console.log('airport data = ', data);
-        // getFlightsByAircraft(airport);
+        console.log('arrival airport data = ', data);
+        setAllArrialsFlights(data);
       })
       .catch(error => {
         console.log(error)
       });
-    setOpen(true);
   }
 
-  function getFlightsByAircraft(icao24) {
+  const getDeparturesByAirport = (airport, begin, end) => {
+    console.log('airport = ',airport, begin, end);
+    let options = {
+      method: 'GET',
+      headers: {}
+    };
+
+    fetch('https://opensky-network.org/api/flights/departure?airport='+airport+'&begin='+begin+'&end='+end, options)
+      .then(response => response.json())
+      .then(data => {
+        console.log('departure airport data = ', data);
+        setAllDepaturesFlights(data);
+      })
+      .catch(error => {
+        console.log(error)
+      });
+  }
+
+  const getFlightsByAircraft = (icao24) => {
     let curTimestamp = new Date().getTime() / 1000 | 0;
-    // console.log("curTimestamp ====> ", curTimestamp);
     let begin = curTimestamp - 48 *  60 * 60;
     let end = curTimestamp;
-    // console.log('begin === > ', begin)
-    // console.log('end === > ', end)
-    var options = {
+    let options = {
       method: 'GET',
       headers: {}
     };
@@ -350,9 +369,9 @@ function HomePage() {
   })
   
   regions = regions.filter(d=>d);
-  console.log('aa = ', aa)
-  console.log('items = ', items)
-  console.log('regions = ', regions)
+  // console.log('aa = ', aa)
+  // console.log('items = ', items)
+  // console.log('regions = ', regions)
   return (
     <div>
       <CssBaseline />
