@@ -63,8 +63,8 @@ const useStyles = makeStyles((theme) => ({
 
 function RegisterPage() {
     const [user, setUser] = useState({
-        firstName: '',
-        lastName: '',
+        // firstName: '',
+        // lastName: '',
         username: '',
         password: ''
     });
@@ -86,7 +86,7 @@ function RegisterPage() {
         e.preventDefault();
 
         setSubmitted(true);
-        if (user.firstName && user.lastName && user.username && user.password) {
+        if (user.username && user.password) {
             dispatch(userActions.register(user));
         }
     }
@@ -106,7 +106,7 @@ function RegisterPage() {
                       Sign Up
                     </Typography>
                     <form name="form" onSubmit={handleSubmit}>
-                      <TextField
+                      {/* <TextField
                         variant="outlined"
                         margin="normal"
                         required
@@ -137,7 +137,7 @@ function RegisterPage() {
                       />
                       {submitted && !user.lastName &&
                           <div className="invalid-feedback">Last Name is required</div>
-                      }
+                      } */}
                       <TextField
                         variant="outlined"
                         margin="normal"
