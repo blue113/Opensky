@@ -399,7 +399,7 @@ function HomePage() {
                     </Typography>
                   </CardContent>
                   <CardActions>
-                    <Button size="small" onClick={() => { getCityInfo(items[index]); }}>Flight Info</Button>
+                    <Button size="small" variant="contained" color="primary" onClick={() => { getCityInfo(items[index]); }}>Flight Info</Button>
                   </CardActions>
                 </Card>
               )
