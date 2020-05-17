@@ -159,7 +159,6 @@ function HomePage() {
     let curTimestamp = new Date().getTime() / 1000 | 0;
     let tm = e.target.value;
     let last = curTimestamp - tm * 60 * 60;
-    console.log("ICAO start last ====> ",icao, curTimestamp, last);
     setLastDeparture(last);
     setDeparting(e.target.value);
     getDeparturesByAirport(icao, last, curTimestamp);
